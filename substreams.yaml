@@ -1,0 +1,21 @@
+specVersion: v0.1.0
+package:
+  name: "block_blocktime"
+  version: v0.1.0
+
+imports:
+  sink_kv: https://github.com/streamingfast/substreams-sink-kv/releases/download/v0.1.2/substreams-sink-kv-v0.1.2.spkg
+  common: https://github.com/pinax-network/substreams/releases/download/common-v0.6.0/common-v0.6.0.spkg
+
+protobuf:
+  files:
+    - service.proto
+  importPaths:
+    - ./proto
+
+sink:
+  module: common:kv_out
+  type: sf.substreams.sink.kv.v1.WASMQueryService
+  config:
+    wasmQueryModule: "@@./blocktime.wasm"
+    grpcService: "pinax.service.v1.BlockTime"

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package pinax.service.v1;
+
+service BlockTime {
+  rpc BlockIdByTime(BlockIdRequest) returns (BlockId);
+  rpc BlockTimeById(BlockTimestampRequest) returns (BlockTimestamp);
+}
+
+message BlockIdRequest {
+  string timestamp = 1;
+}
+message BlockTimestampRequest {
+  uint64 number = 1;
+}
+
+message BlockId {
+  string id = 1;
+  uint64 number = 2;
+}
+
+message BlockTimestamp {
+  string timestamp = 1;
+}
