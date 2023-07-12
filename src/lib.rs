@@ -3,6 +3,7 @@ extern crate core;
 mod pb;
 
 use prost::Message;
+use chrono::prelude::*;
 
 use crate::pb::pinax::service::v1::{BlockIdRequest, BlockTimestampRequest, BlockId, BlockTimestamp};
 use substreams::proto;
@@ -16,11 +17,20 @@ use wasmedge_bindgen_macro::*;
 pub fn pinax_service_v1_blocktime_blockidbytime(v: Vec<u8>) -> Result<Vec<u8>, String> {
     let req = BlockIdRequest::decode(&v[..]).expect("Failed to decode");
     let store = Store::new();
+    let key: String;
 
-    // TODO: Find closest timestamp
+    if let Some(_dt) = req.timestamp.parse::<DateTime<Utc>>().ok() {
+        key = format!("block.timestamp:{}", req.timestamp);
+    } else {
+        let datetime_utc = DateTime::<Utc>::from_utc(naive_datetime, Utc);*/
 
-    let key = format!("block.timestamp:{}", req.timestamp);
-    let out: BlockId = proto::decode(&store.get(key).unwrap().value).unwrap();//BlockId { id: 1, number:  };
+        match store.prefix(format!("block.timestamp:{}", req.timestamp), Some(1)).pairs.first() {
+            Some(kv_pair) => key = kv_pair.key.clone(),
+            None => panic!("Date not found in DB: {:?}", req.timestamp) // TODO: Don't crash but inform user via gRPC error response
+        }
+    }
+
+    let out: BlockId = proto::decode(&store.get(key).unwrap().value).unwrap();
 
     return Ok(out.encode_to_vec());
 }
