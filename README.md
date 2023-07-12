@@ -2,8 +2,6 @@
 
 A gRPC service for querying a block id/number from a timestamp and vice-versa.
 
-An example use case can be for converting a date range (e.g. 2018-06-01 to 2018-07-01) to a block range that can be used as input for other substreams.
-
 ## Setup
 
 Make sure to have the [`substreams-sink-kv`](https://github.com/streamingfast/substreams-sink-kv) tool installed and available in your `$PATH`.
@@ -74,4 +72,23 @@ kblock.timestamp:2018-06-09T11:56:30.500Z       ->      {"id":"00000003d93442ea5
 Found 1 keys
 ```
 
-Here the timestamp (`kblock.timestamp:2018-06-09T11:56:30.500Z`) is actually corresponding to the middle of the day as it's the first known block stored for that day. 
+Here the timestamp (`kblock.timestamp:2018-06-09T11:56:30.500Z`) is actually corresponding to the middle of the day as it's the first known block stored for that day.
+
+**Query a block range from a date range**
+```bash
+$ grpcurl -plaintext -proto ./proto/service.proto -d '{"first_date": "2018-06-09", "second_date": "2018-06-11"}' localhost:7878 pinax.service.v1.BlockTime.BlockRangeByDate                                                                                                  
+{
+  "range": [
+    {
+      "id": "00000003d93442ea55d07be4d515700e2b9737c1f485e8a13ebb3550c1a8bb44",
+      "number": "3"
+    },
+    {
+      "id": "00016e7f319610db9cd1d48642b4b596f5db11c76c7a373d11ed368453a24939",
+      "number": "93823"
+    }
+  ]
+}
+```
+
+Similar behavior to the implementation of getting a `BlockId` from a single date. The `second_date` is actually optional, providing only the first date will result in the block range of `[first_date, first_date + 1 day]` to be returned.
