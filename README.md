@@ -91,4 +91,4 @@ $ grpcurl -plaintext -proto ./proto/service.proto -d '{"first_date": "2018-06-09
 }
 ```
 
-Similar behavior to the implementation of getting a `BlockId` from a single date. The `second_date` is actually optional, providing only the first date will result in the block range of `[first_date, first_date + 1 day]` to be returned.
+Similar behavior to the implementation of getting a `BlockId` (you can specify a single date or a full timestamp). The `second_date` is actually optional, providing only the first date will result in the block range of `[first_date, first_date + 1 day]` to be returned.

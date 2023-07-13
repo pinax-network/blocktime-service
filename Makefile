@@ -33,7 +33,3 @@ graph:
 .PHONY: info
 info:
 	substreams info
-
-.PHONY: gui
-gui:
-	substreams gui -e eos.firehose.eosnation.io:9001 kv_out -s 2 -t +2 
