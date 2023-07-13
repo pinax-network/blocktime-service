@@ -34,13 +34,11 @@ fn safe_get_from_store(key: String) -> Result<Vec<u8>, String> {
 #[wasmedge_bindgen]
 pub fn pinax_service_v1_blocktime_blockidbytime(v: Vec<u8>) -> Result<Vec<u8>, String> {
     let req = BlockIdRequest::decode(&v[..]).expect("[BlockIdRequest] Failed to decode");
-    let key: String;
 
-    if let Some(_dt) = req.timestamp.parse::<DateTime<Utc>>().ok() {
-        key = format!("block.timestamp:{}", req.timestamp);
-    } else {
-        key = get_key_by_prefix(format!("block.timestamp:{}", req.timestamp))?
-    }
+    let key = match req.timestamp.parse::<DateTime<Utc>>() {
+        Ok(_) => format!("block.timestamp:{}", req.timestamp),
+        Err(_) => get_key_by_prefix(format!("block.timestamp:{}", req.timestamp))?
+    };
 
     safe_get_from_store(key)
 }
@@ -59,22 +57,20 @@ pub fn pinax_service_v1_blocktime_blocktimebyid(v: Vec<u8>) -> Result<Vec<u8>, S
 #[wasmedge_bindgen]
 pub fn pinax_service_v1_blocktime_blockrangebydate(v: Vec<u8>) -> Result<Vec<u8>, String> {
     let req = BlockRangeRequest::decode(&v[..]).expect("[BlockRangeRequest] Failed to decode");
-    let first_key: String;
-    let second_key: String;
 
-    first_key = get_key_by_prefix(format!("block.timestamp:{}", req.first_date))?;
+    let first_key = get_key_by_prefix(format!("block.timestamp:{}", req.first_date))?;
+    let second_key = match req.second_date {
+        Some(second_date) => get_key_by_prefix(format!("block.timestamp:{}", second_date))?,
+        None => {
+            // Get next day after `first_date`
+            let naive_date = NaiveDate::parse_from_str(&req.first_date, "%Y-%m-%d").unwrap();
+            let naive_datetime: NaiveDateTime = naive_date.and_hms_opt(0, 0, 0).unwrap();
+            let datetime_utc = DateTime::<Utc>::from_utc(naive_datetime, Utc);
+            let next_day_dt = datetime_utc + Duration::days(1);
 
-    if let Some(second_date) = req.second_date {
-        second_key = get_key_by_prefix(format!("block.timestamp:{}", second_date))?;
-    } else {
-        // Get next day after `first_date`
-        let naive_date = NaiveDate::parse_from_str(&req.first_date, "%Y-%m-%d").unwrap();
-        let naive_datetime: NaiveDateTime = naive_date.and_hms_opt(0, 0, 0).unwrap();
-        let datetime_utc = DateTime::<Utc>::from_utc(naive_datetime, Utc);
-        let next_day_dt = datetime_utc + Duration::days(1);
-
-        second_key = get_key_by_prefix(format!("block.timestamp:{}", next_day_dt.format("%Y-%m-%d").to_string()))?;
-    }
+            get_key_by_prefix(format!("block.timestamp:{}", next_day_dt.format("%Y-%m-%d").to_string()))?
+        }
+    };
 
     let out = BlockRange {
         range: vec![
