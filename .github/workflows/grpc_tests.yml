@@ -1,6 +1,7 @@
 name: gRPC queries tests
 
 on:
+  workflow_dispatch:
   push:
     branches:
     - main
@@ -22,7 +23,7 @@ jobs:
 
       - name: Populate KV store
         run: |
-          timeout 20 ./inject.sh mainnet.eth.streamingfast.io:443 || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
+          timeout 120 ./inject.sh mainnet.eth.streamingfast.io:443 || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
 
       - name: Running tests
         run: ./tests.sh
