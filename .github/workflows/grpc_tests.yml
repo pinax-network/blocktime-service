@@ -1,0 +1,29 @@
+name: gRPC queries tests
+
+on:
+  push:
+    branches:
+    - main
+    paths:
+    - src/
+    
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      SF_API_TOKEN: ${{ secrets.SF_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get SF access token
+        run: |
+          export SUBSTREAMS_API_TOKEN=$(curl https://auth.streamingfast.io/v1/auth/issue -s --data-binary '{"api_key":"'$SF_API_TOKEN'"}' | jq -r .token)
+
+      - name: Populate KV store
+        run: |
+          timeout 20 ./inject.sh mainnet.eth.streamingfast.io:443 || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
+
+      - name: Running tests
+        run: ./tests.sh
+    
