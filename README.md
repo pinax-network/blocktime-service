@@ -1,3 +1,5 @@
+[![tests](https://github.com/pinax-network/blocktime-service/actions/workflows/grpc_tests.yml/badge.svg)](https://github.com/pinax-network/blocktime-service/actions/workflows/grpc_tests.yml)
+
 # Blocktime Query Service
 
 A gRPC service for querying a block id/number from a timestamp and vice-versa.
