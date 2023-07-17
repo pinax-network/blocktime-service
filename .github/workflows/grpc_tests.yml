@@ -10,20 +10,45 @@ on:
     
 
 jobs:
-  test:
+  run-tests:
     runs-on: ubuntu-latest
     env:
       SF_API_TOKEN: ${{ secrets.SF_API_TOKEN }}
+      BLOCKTIME_GITHUB_TOKEN: ${{ secrets.BLOCKTIME_GITHUB_TOKEN }}
     steps:
+      - uses: actions/setup-go@v4
       - uses: actions/checkout@v3
+      
+      - name: Install grpcurl
+        run: go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
 
-      - name: Get SF access token
+      - name: Install WasmEdge library
         run: |
-          export SUBSTREAMS_API_TOKEN=$(curl https://auth.streamingfast.io/v1/auth/issue -s --data-binary '{"api_key":"'$SF_API_TOKEN'"}' | jq -r .token)
+          curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | sudo bash -s -- -p /usr/local
+
+      - name: Install substreams-sink-kv
+        run: |
+          git config --global url."https://${BLOCKTIME_GITHUB_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+          cd $GOPATH
+          mkdir -p src/github.com/substreams-sink-kv
+          cd src/github.com/substreams-sink-kv
+          git clone https://github.com/streamingfast/substreams-sink-kv.git
+          cd substreams-sink-kv
+          go get github.com/second-state/WasmEdge-go/wasmedge@latest
+          cd cmd/substreams-sink-kv
+          go install
+      
+      - name: substreams-sink-kv version check
+        run: |
+          substreams-sink-kv -v
+          substreams-sink-kv -h
 
       - name: Populate KV store
         run: |
-          timeout 120 ./inject.sh mainnet.eth.streamingfast.io:443 || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
+          export SUBSTREAMS_API_TOKEN=$(curl https://auth.streamingfast.io/v1/auth/issue -s --data-binary '{"api_key":"'$SF_API_TOKEN'"}' | jq -r .token)
+          echo $SUBSTREAMS_API_TOKEN
+          cd /home/runner/work/blocktime-service/blocktime-service
+          timeout 60 ./inject.sh mainnet.eth.streamingfast.io:443 || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
 
       - name: Running tests
         run: ./tests.sh

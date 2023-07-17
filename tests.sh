@@ -11,6 +11,10 @@ if ! type "jq" > /dev/null; then
 	echo "Could not find \`jq\` command. See https://jqlang.github.io/jq/ to install."
 fi
 
+if ! type "grpcurl" > /dev/null; then
+	echo "Could not find \`jq\` command. See https://github.com/fullstorydev/grpcurl to install."
+fi
+
 ./serve.sh > /dev/null 2>&1 &
 SERVER_PID=$!
 sleep 10s
