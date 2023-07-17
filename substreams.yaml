@@ -1,6 +1,6 @@
 specVersion: v0.1.0
 package:
-  name: "block_blocktime"
+  name: "blocktime_service"
   version: v0.1.0
 
 imports:
