@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 
-echo "The tests assumes the KV database has been populated with data from the Ethereum blockchain."
-echo "You can run \`inject.sh mainnet.eth.streamingfast.io:443\` to first populate the KV store with the data."
+echo "The test will start-up a KV database and populate it with data from the Ethereum blockchain."
 set -o pipefail # Will fail script for `grpcurl ... | jq ...` commands
 
-if [ ! -f serve.sh ]; then
-	echo "Could not find serve.sh script to start gRPC server"
+if [ ! -f start-kv-sink.sh ]; then
+	echo "Could not find start-kv-sink.sh script to start gRPC server"
 fi
 
 if ! type "jq" > /dev/null; then
@@ -17,9 +16,9 @@ if ! type "grpcurl" > /dev/null; then
 fi
 
 printf "\nStarting gRPC server...\n"
-./serve.sh > /dev/null 2>&1 &
+./start-kv-sink.sh > /dev/null 2>&1 &
 SERVER_PID=$!
-sleep 10s
+sleep 60s
 printf "gRPC server started !\n"
 
 printf "\nTesting \`BlockIdByTime\` queries...\n"

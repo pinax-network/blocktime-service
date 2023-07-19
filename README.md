@@ -8,9 +8,9 @@ A gRPC service for querying a block id/number from a timestamp and vice-versa.
 
 Make sure to have the [`substreams-sink-kv`](https://github.com/streamingfast/substreams-sink-kv) tool installed and available in your `$PATH`.
 
-**Populate the kv-store with data from the remote endpoint**
+**Populate the kv-store with data from the remote endpoint and start the gRPC server**
 ```bash
-./inject.sh <endpoint-url>
+./start-kv-sink.sh <endpoint-url>
 ```
 
 You can install the [`kvdb`](https://github.com/streamingfast/kvdb) tool to inspect the data stored in the *kv-store* locally:
@@ -30,10 +30,7 @@ kvdb read prefix kblock.number --dsn "badger3://$(pwd)/badger_data.db" --decoder
 
 ## Running the service
 
-**Serve the data from localhost through badgerDB**
-```bash
-./serve.sh
-```
+Make sure the `start-kv-sink` script is running before running `grpcurl` queries.
 
 **Service query examples (make sure the `serve` script is running)**
 ```bash

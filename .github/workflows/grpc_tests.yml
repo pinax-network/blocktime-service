@@ -9,7 +9,6 @@ on:
     - src/
     - tests.sh
     - .github/workflows/grpc_tests.yml
-    
 
 jobs:
   run-tests:
