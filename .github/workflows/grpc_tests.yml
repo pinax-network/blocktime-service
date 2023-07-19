@@ -44,13 +44,9 @@ jobs:
           substreams-sink-kv -v
           substreams-sink-kv -h
 
-      - name: Populate KV store
+      - name: Running tests
         run: |
           export SUBSTREAMS_API_TOKEN=$(curl https://auth.streamingfast.io/v1/auth/issue -s --data-binary '{"api_key":"'$SF_API_TOKEN'"}' | jq -r .token)
-          echo $SUBSTREAMS_API_TOKEN
           cd /home/runner/work/blocktime-service/blocktime-service
-          timeout 60 ./inject.sh mainnet.eth.streamingfast.io:443 || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
-
-      - name: Running tests
-        run: ./tests.sh
+          ./tests.sh
     
