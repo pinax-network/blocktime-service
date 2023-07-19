@@ -1,13 +1,9 @@
 .PHONY: all
 all:
-	make build
+	make wasm
 	make pack
 	make graph
 	make info
-
-.PHONY: build
-build:
-	cargo build --target wasm32-unknown-unknown --release
 
 .PHONY: wasm
 wasm:
